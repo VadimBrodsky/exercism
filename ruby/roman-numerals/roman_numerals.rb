@@ -1,5 +1,3 @@
-require 'pry'
-
 class Fixnum
   NUMERALS = {
     1 => 'I',
@@ -9,75 +7,65 @@ class Fixnum
     100 => 'C',
     500 => 'D',
     1000 => 'M'
-  }
+  }.freeze
 
   def to_roman
-    tokens = tokenize(self)
-    # p tokens
-    tokens.reduce('') { |a, e| a + rule_engine(e, numeral(e[:digit], e[:place_value]), suffix(e[:place_value])) }
+    tokenize(self).reduce('') do |memo, token|
+      memo + position_numeral(token)
+    end
   end
 
   private
 
   def tokenize(number)
     number.to_s.chars.reverse.map.with_index do |d, i|
-      { digit: d.to_i, place_value: 10**i }
+      value = 10**i
+      {
+        digit: d.to_i,
+        numeral: to_numeral(d.to_i, value),
+        affix: to_affix(value)
+      }
     end.reverse
   end
 
-  def single(numeral)
-    numeral.to_s
-  end
-
-  def multiple(numeral, i = 1)
-    numeral.to_s * i
-  end
-
-  def prefix(numeral, prefix = 'I', i = 1)
-    prefix * i + numeral
-  end
-
-  def postfix(numeral, postfix = 'I', i = 1)
-    numeral.to_s + postfix * i
-  end
-
-  def rule_engine(token, numeral, suffix)
-    case token[:digit]
-    when 1
-      single numeral
-    when 2
-      multiple numeral, 2
-    when 3
-      multiple numeral, 3
-    when 4
-      prefix numeral, suffix, 1
-    when 5
-      single numeral
-    when 6
-      postfix numeral, suffix, 1
-    when 7
-      postfix numeral, suffix, 2
-    when 8
-      postfix numeral, suffix, 3
-    when 9
-      prefix numeral, suffix, 1
-    else
-      ''
-    end
-  end
-
-  def numeral(digit, value)
+  def to_numeral(digit, value)
     return NUMERALS[value] if digit < 4
     return NUMERALS[value * 5] if (4..8).cover? digit
     return NUMERALS[value * 10] if digit > 8
   end
 
-  def suffix(value)
-    NUMERALS[value]
+  def position_numeral(token)
+    numeral = token[:numeral]
+    digit = token[:digit]
+    affix = token[:affix]
+
+    return single(numeral) if [1, 5].include? digit
+    return multiple(numeral, digit) if [2, 3].include? digit
+    return prefix(numeral, affix, 1) if [4, 9].include? digit
+    return suffix(numeral, affix, digit - 5) if [6, 7, 8].include? digit
+    ''
+  end
+
+  def to_affix(value)
+    NUMERALS[value] || ''
+  end
+
+  def single(numeral)
+    numeral
+  end
+
+  def multiple(numeral, i)
+    numeral * i
+  end
+
+  def prefix(numeral, affix, i)
+    affix * i + numeral
+  end
+
+  def suffix(numeral, affix, i)
+    numeral + affix * i
   end
 end
-
-# binding.pry
 
 module BookKeeping
   VERSION = 2
