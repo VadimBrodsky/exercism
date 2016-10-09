@@ -14,14 +14,14 @@ class Fixnum
   def to_roman
     tokens = tokenize(self)
     # p tokens
-    tokens.reduce('') { |a, e| a + rule_engine(e, numeral_engine(e), suffix_engine(e)) }
+    tokens.reduce('') { |a, e| a + rule_engine(e, numeral(e[:digit], e[:place_value]), suffix(e[:place_value])) }
   end
 
   private
 
   def tokenize(number)
     number.to_s.chars.reverse.map.with_index do |d, i|
-      { digit: d.to_i, place_value: 10 ** i }
+      { digit: d.to_i, place_value: 10**i }
     end.reverse
   end
 
@@ -66,46 +66,18 @@ class Fixnum
     end
   end
 
-  def numeral_engine(token)
-    if token[:digit] < 4
-      if token[:place_value] < 10
-        NUMERALS[1]
-      elsif token[:place_value] > 9 && token[:place_value] < 100
-        NUMERALS[10]
-      elsif token[:place_value] > 99 && token[:place_value] < 1000
-        NUMERALS[100]
-      else
-        NUMERALS[1000]
-      end
-    elsif token[:digit] > 3 && token[:digit] < 9
-      if token[:place_value] < 10
-        NUMERALS[5]
-      elsif token[:place_value] >= 10 && token[:place_value] < 100
-        NUMERALS[50]
-      elsif token[:place_value] >= 100
-        NUMERALS[500]
-      end
-    elsif token[:digit] == 9
-      if token[:place_value] < 10
-        NUMERALS[10]
-      elsif token[:place_value] > 9 && token[:place_value] < 100
-        NUMERALS[100]
-      else
-        NUMERALS[1000]
-      end
-    end
+  def numeral(digit, value)
+    return NUMERALS[value] if digit < 4
+    return NUMERALS[value * 5] if (4..8).cover? digit
+    return NUMERALS[value * 10] if digit > 8
   end
 
-  def suffix_engine(token)
-    if token[:place_value] < 10
-      NUMERALS[1]
-    elsif token[:place_value] > 9 && token[:place_value] < 100
-      NUMERALS[10]
-    elsif token[:place_value] > 99
-      NUMERALS[100]
-    end
+  def suffix(value)
+    NUMERALS[value]
   end
 end
+
+# binding.pry
 
 module BookKeeping
   VERSION = 2
