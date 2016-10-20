@@ -11,7 +11,7 @@ class Fixnum
 
   def to_roman
     tokenize(self).reduce('') do |memo, token|
-      memo + position_numeral(token)
+      memo + place_numeral(token)
     end
   end
 
@@ -20,6 +20,7 @@ class Fixnum
   def tokenize(number)
     number.to_s.chars.reverse.map.with_index do |d, i|
       value = 10**i
+
       {
         digit: d.to_i,
         numeral: to_numeral(d.to_i, value),
@@ -34,7 +35,7 @@ class Fixnum
     return NUMERALS[value * 10] if digit > 8
   end
 
-  def position_numeral(token)
+  def place_numeral(token)
     numeral = token[:numeral]
     digit = token[:digit]
     affix = token[:affix]
