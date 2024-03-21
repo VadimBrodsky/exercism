@@ -4,8 +4,7 @@ import "time"
 
 // Schedule returns a time.Time from a string containing a date.
 func Schedule(date string) time.Time {
-	layout := "1/02/2006 15:04:05"
-	t, err := time.Parse(layout, date)
+	t, err := time.Parse("1/02/2006 15:04:05", date)
 
 	if err != nil {
 		panic("cannot parse the scheduled date " + date)
@@ -16,21 +15,18 @@ func Schedule(date string) time.Time {
 
 // HasPassed returns whether a date has passed.
 func HasPassed(date string) bool {
-	layout := "January 2, 2006 15:04:05"
-	appointment, err := time.Parse(layout, date)
+	appointment, err := time.Parse("January 2, 2006 15:04:05", date)
 
 	if err != nil {
 		panic("cannot parse the scheduled date " + date)
 	}
 
-	c := appointment.Compare(time.Now())
-	return c == -1
+	return appointment.Before(time.Now())
 }
 
 // IsAfternoonAppointment returns whether a time is in the afternoon.
 func IsAfternoonAppointment(date string) bool {
-	layout := "Monday, January 2, 2006 15:04:05"
-	appointment, err := time.Parse(layout, date)
+	appointment, err := time.Parse("Monday, January 2, 2006 15:04:05", date)
 
 	if err != nil {
 		panic("cannot parse the scheduled date " + date)
@@ -41,8 +37,7 @@ func IsAfternoonAppointment(date string) bool {
 
 // Description returns a formatted string of the appointment time.
 func Description(date string) string {
-	layout := "1/2/2006 15:04:05"
-	appointment, err := time.Parse(layout, date)
+	appointment, err := time.Parse("1/2/2006 15:04:05", date)
 
 	if err != nil {
 		panic("cannot parse the scheduled date " + date)
